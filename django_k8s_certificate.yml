@@ -1,0 +1,27 @@
+apiVersion: v1
+items:
+- apiVersion: networking.gke.io/v1beta1
+  kind: ManagedCertificate
+  metadata:
+    name: prod-certificate
+  spec:
+    domains:
+      - softsight.net
+  status: {}
+- apiVersion: extensions/v1beta1
+  kind: Ingress
+  metadata:
+    name: ingress
+    annotations:
+      kubernetes.io/ingress.global-static-ip-name: "ingress-prod"
+      networking.gke.io/managed-certificates: "prod-certificate"
+  spec:
+    rules:
+    - http:
+        paths:
+        - path: /*
+          backend:
+            serviceName: traefik
+            servicePort: 80
+kind: List
+metadata: {}

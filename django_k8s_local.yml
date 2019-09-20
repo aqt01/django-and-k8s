@@ -1,0 +1,941 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kompose.cmd: kompose convert -f prod_local.yml -o django_local.yml
+      kompose.version: 1.18.0 (06a2e56)
+    creationTimestamp: null
+    labels:
+      io.kompose.service: flower
+    name: flower
+  spec:
+    ports:
+    - name: "5555"
+      port: 5555
+      targetPort: 5555
+    selector:
+      io.kompose.service: flower
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kompose.cmd: kompose convert -f prod_local.yml -o django_local.yml
+      kompose.version: 1.18.0 (06a2e56)
+    creationTimestamp: null
+    labels:
+      io.kompose.service: postgres 
+    name: postgres 
+  spec:
+    ports:
+    - name: "5432"
+      port: 5432
+      targetPort: 5432
+    selector:
+      io.kompose.service: postgres
+  status:
+    loadBalancer: {}
+- apiVersion: networking.k8s.io/v1beta1 
+  kind: Ingress
+  metadata:
+   name: ingress
+   annotations:
+     kubernetes.io/ingress.class: traefik
+  spec:
+    rules:
+    - host: k8s.local
+      http:
+        paths:
+        - backend:
+            serviceName: traefik 
+            servicePort: 80
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kompose.cmd: kompose convert -f prod_local.yml -o django_local.yml
+      kompose.version: 1.18.0 (06a2e56)
+    creationTimestamp: null
+    labels:
+      io.kompose.service: django 
+    name: django  
+  spec:
+    ports:
+    - name: "5000"
+      port: 5000
+      targetPort: 5000
+    type: NodePort
+    selector:
+      io.kompose.service: django 
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kompose.cmd: kompose convert -f prod_local.yml -o django_local.yml
+      kompose.version: 1.18.0 (06a2e56)
+    creationTimestamp: null
+    labels:
+      io.kompose.service: traefik
+    name: traefik
+  spec:
+    ports:
+    - name: "80"
+      port: 80
+      targetPort: 80
+    - name: "443"
+      port: 443
+      targetPort: 443
+    selector:
+      io.kompose.service: traefik
+    type: NodePort 
+  status:
+    loadBalancer: {}
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    annotations:
+      kompose.cmd: kompose convert -f prod_local.yml -o django_local.yml
+      kompose.version: 1.18.0 (06a2e56)
+    creationTimestamp: null
+    labels:
+      io.kompose.service: celerybeat
+    name: celerybeat
+  spec:
+    replicas: 1
+    strategy: {}
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          io.kompose.service: celerybeat
+      spec:
+        containers:
+        - args:
+          - /start-celerybeat
+          env:
+          - name: CELERY_FLOWER_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: CELERY_FLOWER_PASSWORD
+                name: celerybeat-envs--production--django
+          - name: CELERY_FLOWER_USER
+            valueFrom:
+              configMapKeyRef:
+                key: CELERY_FLOWER_USER
+                name: celerybeat-envs--production--django
+          - name: DJANGO_ACCOUNT_ALLOW_REGISTRATION
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_ACCOUNT_ALLOW_REGISTRATION
+                name: celerybeat-envs--production--django
+          - name: DJANGO_ADMIN_URL
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_ADMIN_URL
+                name: celerybeat-envs--production--django
+          - name: DJANGO_ALLOWED_HOSTS
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_ALLOWED_HOSTS
+                name: celerybeat-envs--production--django
+          - name: DJANGO_GCP_STORAGE_BUCKET_NAME
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_GCP_STORAGE_BUCKET_NAME
+                name: celerybeat-envs--production--django
+          - name: DJANGO_SECRET_KEY
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_SECRET_KEY
+                name: celerybeat-envs--production--django
+          - name: DJANGO_SECURE_SSL_REDIRECT
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_SECURE_SSL_REDIRECT
+                name: celerybeat-envs--production--django
+          - name: DJANGO_SERVER_EMAIL
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_SERVER_EMAIL
+                name: celerybeat-envs--production--django
+          - name: DJANGO_SETTINGS_MODULE
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_SETTINGS_MODULE
+                name: celerybeat-envs--production--django
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            valueFrom:
+              configMapKeyRef:
+                key: GOOGLE_APPLICATION_CREDENTIALS
+                name: celerybeat-envs--production--django
+          - name: MAILGUN_API_KEY
+            valueFrom:
+              configMapKeyRef:
+                key: MAILGUN_API_KEY
+                name: celerybeat-envs--production--django
+          - name: MAILGUN_DOMAIN
+            valueFrom:
+              configMapKeyRef:
+                key: MAILGUN_DOMAIN
+                name: celerybeat-envs--production--django
+          - name: POSTGRES_DB
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_DB
+                name: celerybeat-envs--production--postgres
+          - name: POSTGRES_HOST
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_HOST
+                name: celerybeat-envs--production--postgres
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_PASSWORD
+                name: celerybeat-envs--production--postgres
+          - name: POSTGRES_PORT
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_PORT
+                name: celerybeat-envs--production--postgres
+          - name: POSTGRES_USER
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_USER
+                name: celerybeat-envs--production--postgres
+          - name: REDIS_URL
+            valueFrom:
+              configMapKeyRef:
+                key: REDIS_URL
+                name: celerybeat-envs--production--django
+          - name: WEB_CONCURRENCY
+            valueFrom:
+              configMapKeyRef:
+                key: WEB_CONCURRENCY
+                name: celerybeat-envs--production--django
+          image: aqt01/django_k8s_local 
+          name: celerybeat
+          resources: {}
+        restartPolicy: Always
+  status: {}
+- apiVersion: v1
+  data:
+    CELERY_FLOWER_PASSWORD: debug
+    CELERY_FLOWER_USER: debug
+    DJANGO_ACCOUNT_ALLOW_REGISTRATION: "True"
+    DJANGO_ADMIN_URL: 7dzADKWwx0i4hpW6Aby6jM8TTFBR2lVi/
+    DJANGO_ALLOWED_HOSTS: "*"
+    DJANGO_GCP_STORAGE_BUCKET_NAME: ""
+    DJANGO_SECRET_KEY: QIVLBOAdbU7edsDGgxjt7otq4C7RoMLWLP2wpCvRbQOWJ1DOFHKjwWzWbrGjKsUA
+    DJANGO_SECURE_SSL_REDIRECT: "False"
+    DJANGO_SERVER_EMAIL: ""
+    DJANGO_SETTINGS_MODULE: config.settings.production
+    GOOGLE_APPLICATION_CREDENTIALS: ""
+    MAILGUN_API_KEY: ""
+    MAILGUN_DOMAIN: ""
+    REDIS_URL: redis://redis:6379/0
+    WEB_CONCURRENCY: "4"
+  kind: ConfigMap
+  metadata:
+    creationTimestamp: null
+    labels:
+      io.kompose.service: celerybeat-envs--production--django
+    name: celerybeat-envs--production--django
+- apiVersion: v1
+  data:
+    POSTGRES_DB: django_k8s
+    POSTGRES_HOST: postgres
+    POSTGRES_PASSWORD: debug
+    POSTGRES_PORT: "5432"
+    POSTGRES_USER: debug
+  kind: ConfigMap
+  metadata:
+    creationTimestamp: null
+    labels:
+      io.kompose.service: celerybeat-envs--production--postgres
+    name: celerybeat-envs--production--postgres
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    annotations:
+      kompose.cmd: kompose convert -f prod_local.yml -o django_local.yml
+      kompose.version: 1.18.0 (06a2e56)
+    creationTimestamp: null
+    labels:
+      io.kompose.service: celeryworker
+    name: celeryworker
+  spec:
+    replicas: 1
+    strategy: {}
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          io.kompose.service: celeryworker
+      spec:
+        containers:
+        - args:
+          - /start-celeryworker
+          env:
+          - name: CELERY_FLOWER_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: CELERY_FLOWER_PASSWORD
+                name: celeryworker-envs--production--django
+          - name: CELERY_FLOWER_USER
+            valueFrom:
+              configMapKeyRef:
+                key: CELERY_FLOWER_USER
+                name: celeryworker-envs--production--django
+          - name: DJANGO_ACCOUNT_ALLOW_REGISTRATION
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_ACCOUNT_ALLOW_REGISTRATION
+                name: celeryworker-envs--production--django
+          - name: DJANGO_ADMIN_URL
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_ADMIN_URL
+                name: celeryworker-envs--production--django
+          - name: DJANGO_ALLOWED_HOSTS
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_ALLOWED_HOSTS
+                name: celeryworker-envs--production--django
+          - name: DJANGO_GCP_STORAGE_BUCKET_NAME
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_GCP_STORAGE_BUCKET_NAME
+                name: celeryworker-envs--production--django
+          - name: DJANGO_SECRET_KEY
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_SECRET_KEY
+                name: celeryworker-envs--production--django
+          - name: DJANGO_SECURE_SSL_REDIRECT
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_SECURE_SSL_REDIRECT
+                name: celeryworker-envs--production--django
+          - name: DJANGO_SERVER_EMAIL
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_SERVER_EMAIL
+                name: celeryworker-envs--production--django
+          - name: DJANGO_SETTINGS_MODULE
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_SETTINGS_MODULE
+                name: celeryworker-envs--production--django
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            valueFrom:
+              configMapKeyRef:
+                key: GOOGLE_APPLICATION_CREDENTIALS
+                name: celeryworker-envs--production--django
+          - name: MAILGUN_API_KEY
+            valueFrom:
+              configMapKeyRef:
+                key: MAILGUN_API_KEY
+                name: celeryworker-envs--production--django
+          - name: MAILGUN_DOMAIN
+            valueFrom:
+              configMapKeyRef:
+                key: MAILGUN_DOMAIN
+                name: celeryworker-envs--production--django
+          - name: POSTGRES_DB
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_DB
+                name: celeryworker-envs--production--postgres
+          - name: POSTGRES_HOST
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_HOST
+                name: celeryworker-envs--production--postgres
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_PASSWORD
+                name: celeryworker-envs--production--postgres
+          - name: POSTGRES_PORT
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_PORT
+                name: celeryworker-envs--production--postgres
+          - name: POSTGRES_USER
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_USER
+                name: celeryworker-envs--production--postgres
+          - name: REDIS_URL
+            valueFrom:
+              configMapKeyRef:
+                key: REDIS_URL
+                name: celeryworker-envs--production--django
+          - name: WEB_CONCURRENCY
+            valueFrom:
+              configMapKeyRef:
+                key: WEB_CONCURRENCY
+                name: celeryworker-envs--production--django
+          image: aqt01/django_k8s_local
+          name: celeryworker
+          resources: {}
+        restartPolicy: Always
+  status: {}
+- apiVersion: v1
+  data:
+    CELERY_FLOWER_PASSWORD: debug
+    CELERY_FLOWER_USER: debug
+    DJANGO_DATABASE_URL: 'postgres://debug:debug@postgres:5432/django_k8s'
+    DJANGO_ACCOUNT_ALLOW_REGISTRATION: "True"
+    DJANGO_ADMIN_URL: 7dzADKWwx0i4hpW6Aby6jM8TTFBR2lVi/
+    DJANGO_ALLOWED_HOSTS: "*" 
+    DJANGO_GCP_STORAGE_BUCKET_NAME: ""
+    DJANGO_SECRET_KEY: QIVLBOAdbU7edsDGgxjt7otq4C7RoMLWLP2wpCvRbQOWJ1DOFHKjwWzWbrGjKsUA
+    DJANGO_SECURE_SSL_REDIRECT: "False"
+    DJANGO_SERVER_EMAIL: ""
+    DJANGO_SETTINGS_MODULE: config.settings.production
+    GOOGLE_APPLICATION_CREDENTIALS: ""
+    MAILGUN_API_KEY: ""
+    MAILGUN_DOMAIN: ""
+    REDIS_URL: redis://redis:6379/0
+    WEB_CONCURRENCY: "4"
+  kind: ConfigMap
+  metadata:
+    creationTimestamp: null
+    labels:
+      io.kompose.service: celeryworker-envs--production--django
+    name: celeryworker-envs--production--django
+- apiVersion: v1
+  data:
+    POSTGRES_DB: django_k8s
+    POSTGRES_HOST: postgres
+    POSTGRES_PASSWORD: debug
+    POSTGRES_PORT: "5432"
+    POSTGRES_USER: debug
+  kind: ConfigMap
+  metadata:
+    creationTimestamp: null
+    labels:
+      io.kompose.service: celeryworker-envs--production--postgres
+    name: celeryworker-envs--production--postgres
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    annotations:
+      kompose.cmd: kompose convert -f prod_local.yml -o django_local.yml
+      kompose.version: 1.18.0 (06a2e56)
+    creationTimestamp: null
+    labels:
+      io.kompose.service: django
+    name: django
+  spec:
+    replicas: 1
+    strategy: {}
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          io.kompose.service: django
+      spec:
+        containers:
+        - args:
+          - /start
+          env:
+          - name: CELERY_FLOWER_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: CELERY_FLOWER_PASSWORD
+                name: django-envs--production--django
+          - name: CELERY_FLOWER_USER
+            valueFrom:
+              configMapKeyRef:
+                key: CELERY_FLOWER_USER
+                name: django-envs--production--django
+          - name: DJANGO_ACCOUNT_ALLOW_REGISTRATION
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_ACCOUNT_ALLOW_REGISTRATION
+                name: django-envs--production--django
+          - name: DJANGO_ADMIN_URL
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_ADMIN_URL
+                name: django-envs--production--django
+          - name: DJANGO_ALLOWED_HOSTS
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_ALLOWED_HOSTS
+                name: django-envs--production--django
+          - name: DJANGO_GCP_STORAGE_BUCKET_NAME
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_GCP_STORAGE_BUCKET_NAME
+                name: django-envs--production--django
+          - name: DJANGO_SECRET_KEY
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_SECRET_KEY
+                name: django-envs--production--django
+          - name: DJANGO_SECURE_SSL_REDIRECT
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_SECURE_SSL_REDIRECT
+                name: django-envs--production--django
+          - name: DJANGO_SERVER_EMAIL
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_SERVER_EMAIL
+                name: django-envs--production--django
+          - name: DJANGO_SETTINGS_MODULE
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_SETTINGS_MODULE
+                name: django-envs--production--django
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            valueFrom:
+              configMapKeyRef:
+                key: GOOGLE_APPLICATION_CREDENTIALS
+                name: django-envs--production--django
+          - name: MAILGUN_API_KEY
+            valueFrom:
+              configMapKeyRef:
+                key: MAILGUN_API_KEY
+                name: django-envs--production--django
+          - name: MAILGUN_DOMAIN
+            valueFrom:
+              configMapKeyRef:
+                key: MAILGUN_DOMAIN
+                name: django-envs--production--django
+          - name: POSTGRES_DB
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_DB
+                name: django-envs--production--postgres
+          - name: POSTGRES_HOST
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_HOST
+                name: django-envs--production--postgres
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_PASSWORD
+                name: django-envs--production--postgres
+          - name: POSTGRES_PORT
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_PORT
+                name: django-envs--production--postgres
+          - name: POSTGRES_USER
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_USER
+                name: django-envs--production--postgres
+          - name: REDIS_URL
+            valueFrom:
+              configMapKeyRef:
+                key: REDIS_URL
+                name: django-envs--production--django
+          - name: WEB_CONCURRENCY
+            valueFrom:
+              configMapKeyRef:
+                key: WEB_CONCURRENCY
+                name: django-envs--production--django
+          image: aqt01/django_k8s_local
+          name: django
+          ports:
+          - containerPort: 5000
+          resources: {}
+        restartPolicy: Always
+  status: {}
+- apiVersion: v1
+  data:
+    CELERY_FLOWER_PASSWORD: debug
+    CELERY_FLOWER_USER: debug
+    DJANGO_ACCOUNT_ALLOW_REGISTRATION: "True"
+    DJANGO_ADMIN_URL: 7dzADKWwx0i4hpW6Aby6jM8TTFBR2lVi/
+    DJANGO_ALLOWED_HOSTS: "*" 
+    DJANGO_GCP_STORAGE_BUCKET_NAME: ""
+    DJANGO_SECRET_KEY: QIVLBOAdbU7edsDGgxjt7otq4C7RoMLWLP2wpCvRbQOWJ1DOFHKjwWzWbrGjKsUA
+    DJANGO_SECURE_SSL_REDIRECT: "False"
+    DJANGO_SERVER_EMAIL: ""
+    DJANGO_SETTINGS_MODULE: config.settings.production
+    GOOGLE_APPLICATION_CREDENTIALS: ""
+    MAILGUN_API_KEY: ""
+    MAILGUN_DOMAIN: ""
+    REDIS_URL: redis://redis:6379/0
+    WEB_CONCURRENCY: "4"
+  kind: ConfigMap
+  metadata:
+    creationTimestamp: null
+    labels:
+      io.kompose.service: django-envs--production--django
+    name: django-envs--production--django
+- apiVersion: v1
+  data:
+    POSTGRES_DB: django_k8s
+    POSTGRES_HOST: postgres
+    POSTGRES_PASSWORD: debug
+    POSTGRES_PORT: "5432"
+    POSTGRES_USER: debug
+  kind: ConfigMap
+  metadata:
+    creationTimestamp: null
+    labels:
+      io.kompose.service: django-envs--production--postgres
+    name: django-envs--production--postgres
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    annotations:
+      kompose.cmd: kompose convert -f prod_local.yml -o django_local.yml
+      kompose.version: 1.18.0 (06a2e56)
+    creationTimestamp: null
+    labels:
+      io.kompose.service: flower
+    name: flower
+  spec:
+    replicas: 1
+    strategy: {}
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          io.kompose.service: flower
+      spec:
+        containers:
+        - args:
+          - /start-flower
+          env:
+          - name: CELERY_FLOWER_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: CELERY_FLOWER_PASSWORD
+                name: flower-envs--production--django
+          - name: CELERY_FLOWER_USER
+            valueFrom:
+              configMapKeyRef:
+                key: CELERY_FLOWER_USER
+                name: flower-envs--production--django
+          - name: DJANGO_ACCOUNT_ALLOW_REGISTRATION
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_ACCOUNT_ALLOW_REGISTRATION
+                name: flower-envs--production--django
+          - name: DJANGO_ADMIN_URL
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_ADMIN_URL
+                name: flower-envs--production--django
+          - name: DJANGO_ALLOWED_HOSTS
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_ALLOWED_HOSTS
+                name: flower-envs--production--django
+          - name: DJANGO_GCP_STORAGE_BUCKET_NAME
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_GCP_STORAGE_BUCKET_NAME
+                name: flower-envs--production--django
+          - name: DJANGO_SECRET_KEY
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_SECRET_KEY
+                name: flower-envs--production--django
+          - name: DJANGO_SECURE_SSL_REDIRECT
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_SECURE_SSL_REDIRECT
+                name: flower-envs--production--django
+          - name: DJANGO_SERVER_EMAIL
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_SERVER_EMAIL
+                name: flower-envs--production--django
+          - name: DJANGO_SETTINGS_MODULE
+            valueFrom:
+              configMapKeyRef:
+                key: DJANGO_SETTINGS_MODULE
+                name: flower-envs--production--django
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            valueFrom:
+              configMapKeyRef:
+                key: GOOGLE_APPLICATION_CREDENTIALS
+                name: flower-envs--production--django
+          - name: MAILGUN_API_KEY
+            valueFrom:
+              configMapKeyRef:
+                key: MAILGUN_API_KEY
+                name: flower-envs--production--django
+          - name: MAILGUN_DOMAIN
+            valueFrom:
+              configMapKeyRef:
+                key: MAILGUN_DOMAIN
+                name: flower-envs--production--django
+          - name: POSTGRES_DB
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_DB
+                name: flower-envs--production--postgres
+          - name: POSTGRES_HOST
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_HOST
+                name: flower-envs--production--postgres
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_PASSWORD
+                name: flower-envs--production--postgres
+          - name: POSTGRES_PORT
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_PORT
+                name: flower-envs--production--postgres
+          - name: POSTGRES_USER
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_USER
+                name: flower-envs--production--postgres
+          - name: REDIS_URL
+            valueFrom:
+              configMapKeyRef:
+                key: REDIS_URL
+                name: flower-envs--production--django
+          - name: WEB_CONCURRENCY
+            valueFrom:
+              configMapKeyRef:
+                key: WEB_CONCURRENCY
+                name: flower-envs--production--django
+          image: aqt01/django_k8s_local
+          name: flower
+          ports:
+          - containerPort: 5555
+          resources: {}
+        restartPolicy: Always
+  status: {}
+- apiVersion: v1
+  data:
+    CELERY_FLOWER_PASSWORD: debug
+    CELERY_FLOWER_USER: debug
+    DJANGO_ACCOUNT_ALLOW_REGISTRATION: "True"
+    DJANGO_ADMIN_URL: 7dzADKWwx0i4hpW6Aby6jM8TTFBR2lVi/
+    DJANGO_ALLOWED_HOSTS: "*" 
+    DJANGO_GCP_STORAGE_BUCKET_NAME: ""
+    DJANGO_SECRET_KEY: QIVLBOAdbU7edsDGgxjt7otq4C7RoMLWLP2wpCvRbQOWJ1DOFHKjwWzWbrGjKsUA
+    DJANGO_SECURE_SSL_REDIRECT: "False"
+    DJANGO_SERVER_EMAIL: ""
+    DJANGO_SETTINGS_MODULE: config.settings.production
+    GOOGLE_APPLICATION_CREDENTIALS: ""
+    MAILGUN_API_KEY: ""
+    MAILGUN_DOMAIN: ""
+    REDIS_URL: redis://redis:6379/0
+    WEB_CONCURRENCY: "4"
+  kind: ConfigMap
+  metadata:
+    creationTimestamp: null
+    labels:
+      io.kompose.service: flower-envs--production--django
+    name: flower-envs--production--django
+- apiVersion: v1
+  data:
+    POSTGRES_DB: django_k8s
+    POSTGRES_HOST: postgres
+    POSTGRES_PASSWORD: debug
+    POSTGRES_PORT: "5432"
+    POSTGRES_USER: debug
+  kind: ConfigMap
+  metadata:
+    creationTimestamp: null
+    labels:
+      io.kompose.service: flower-envs--production--postgres
+    name: flower-envs--production--postgres
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    annotations:
+      kompose.cmd: kompose convert -f prod_local.yml -o django_local.yml
+      kompose.version: 1.18.0 (06a2e56)
+    creationTimestamp: null
+    labels:
+      io.kompose.service: postgres
+    name: postgres
+  spec:
+    replicas: 1
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          io.kompose.service: postgres
+      spec:
+        containers:
+        - env:
+          - name: POSTGRES_DB
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_DB
+                name: postgres-envs--production--postgres
+          - name: POSTGRES_HOST
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_HOST
+                name: postgres-envs--production--postgres
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_PASSWORD
+                name: postgres-envs--production--postgres
+          - name: POSTGRES_PORT
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_PORT
+                name: postgres-envs--production--postgres
+          - name: POSTGRES_USER
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_USER
+                name: postgres-envs--production--postgres
+          image: postgres:11.3
+          name: postgres
+          resources: {}
+          volumeMounts:
+          - mountPath: /var/lib/postgresql/data
+            name: production-postgres-data
+          - mountPath: /backups
+            name: production-postgres-data-backups
+        restartPolicy: Always
+        volumes:
+        - name: production-postgres-data
+          persistentVolumeClaim:
+            claimName: production-postgres-data
+        - name: production-postgres-data-backups
+          persistentVolumeClaim:
+            claimName: production-postgres-data-backups
+  status: {}
+- apiVersion: v1
+  data:
+    POSTGRES_DB: django_k8s
+    POSTGRES_HOST: postgres
+    POSTGRES_PASSWORD: debug
+    POSTGRES_PORT: "5432"
+    POSTGRES_USER: debug
+  kind: ConfigMap
+  metadata:
+    creationTimestamp: null
+    labels:
+      io.kompose.service: postgres-envs--production--postgres
+    name: postgres-envs--production--postgres
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    creationTimestamp: null
+    labels:
+      io.kompose.service: production-postgres-data
+    name: production-postgres-data
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 100Mi
+  status: {}
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    creationTimestamp: null
+    labels:
+      io.kompose.service: production-postgres-data-backups
+    name: production-postgres-data-backups
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 100Mi
+  status: {}
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    annotations:
+      kompose.cmd: kompose convert -f prod_local.yml -o django_local.yml
+      kompose.version: 1.18.0 (06a2e56)
+    creationTimestamp: null
+    labels:
+      io.kompose.service: redis
+    name: redis
+  spec:
+    replicas: 1
+    strategy: {}
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          io.kompose.service: redis
+      spec:
+        containers:
+        - image: redis:5.0
+          name: redis
+          resources: {}
+        restartPolicy: Always
+  status: {}
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    annotations:
+      kompose.cmd: kompose convert -f prod_local.yml -o django_local.yml
+      kompose.version: 1.18.0 (06a2e56)
+    creationTimestamp: null
+    labels:
+      io.kompose.service: traefik
+    name: traefik
+  spec:
+    replicas: 1
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          io.kompose.service: traefik
+      spec:
+        containers:
+        - image: aqt01/django_k8s_traefik_local
+          name: traefik
+          ports:
+          - containerPort: 80
+          - containerPort: 443
+          resources: {}
+          volumeMounts:
+          - mountPath: /etc/traefik/acme
+            name: production-traefik
+        restartPolicy: Always
+        volumes:
+        - name: production-traefik
+          persistentVolumeClaim:
+            claimName: production-traefik
+  status: {}
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    creationTimestamp: null
+    labels:
+      io.kompose.service: production-traefik
+    name: production-traefik
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 100Mi
+  status: {}
+kind: List
+metadata: {}
+
