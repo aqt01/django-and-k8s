@@ -277,3 +277,4 @@ django_k8s/media/
 .env
 .envs/*
 !.envs/.local/
+!.envs/.production/
