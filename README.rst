@@ -14,36 +14,85 @@ django-k8s
 :License: MIT
 
 
-STARTUP
-------
+Django + K8s Instructions
+-------------------------
+
 
 Docker compose
 ^^^^^^^^^^^^^^
 
-For local `127.0.0.1:80` docker-compose 
 
-> docker-compose -f prod_local.yml up
+For local `127.0.0.1:80`::
+
+    $ pocker-compose -f prod_local.yml up
 
 
-For prod `domain` docker-compose 
+For production with `domain` https validation:: 
 
-> docker-compose -f production.yml up
+    $ docker-compose -f production.yml up
 
 
 Kubernetes
 ^^^^^^^^^^
 
+Start minikube::
 
--> minikube start --memory 8192 --cpus 4
+    $ minikube start --memory 8192 --cpus 4
 
--> minikube addons enable ingress
+
+Enable ingress internally:: 
+
+    $ minikube addons enable ingress
+
+
+Start django stack locally on minikube::
+
+    $ kubectl apply  -f django_k8s_local.yml
+
+
+Kompose
+^^^^^^
+
+Just for demostration::
+
+    $ kompose convert -f prod_local.yml -o django_for_k8s.yml
 
 
 GCP 
 ^^^
 
+Create the IP::
 
--> gcloud compute addresses create kubernetes-ingress --region us-east1
+    $  gcloud compute addresses create ingress-prod --global
+    
+
+Create the namespace (optional)::
+    
+    $ kubectl create namespace k8s     
+
+
+Create django kubernetes deployments::
+
+    $ kubectl apply -f django_k8s.yml --namespace k8s
+    
+
+Create certificates for domain (please edit the current domain)::
+
+    $ kubectl apply -f django_k8s_certificate.yml --namespace k8s
+
+
+Verify the creation of the resources::
+
+    $ kubectl get pods --namespace k8s
+
+    $ kubectl get services --namespace k8s
+
+    $ kubectl get ingress --namespace k8s
+
+
+Check the status of the certificate. You should wait some secs until it provision the ssl correctly ::
+
+    $ kubectl describe managedcertificates --namespace k8
 
 
 Settings
@@ -52,6 +101,7 @@ Settings
 Moved to settings_.
 
 .. _settings: http://cookiecutter-django.readthedocs.io/en/latest/settings.html
+
 
 Basic Commands
 --------------
