@@ -8,6 +8,25 @@ items:
       kompose.version: 1.18.0 (06a2e56)
     creationTimestamp: null
     labels:
+      io.kompose.service: postgres 
+    name: postgres 
+  spec:
+    ports:
+    - name: "5432"
+      port: 5432
+      targetPort: 5432
+    selector:
+      io.kompose.service: postgres
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kompose.cmd: kompose convert -f prod_local.yml -o django_local.yml
+      kompose.version: 1.18.0 (06a2e56)
+    creationTimestamp: null
+    labels:
       io.kompose.service: flower
     name: flower
   spec:
@@ -39,7 +58,7 @@ items:
       targetPort: 443
     selector:
       io.kompose.service: traefik
-    type: NodePort 
+    type: LoadBalancer 
   status:
     loadBalancer: {}
 - apiVersion: extensions/v1beta1
@@ -846,7 +865,7 @@ items:
           io.kompose.service: traefik
       spec:
         containers:
-        - image: aqt01/django_k8s_traefik
+        - image: aqt01/django_k8s_traefik_gke
           name: traefik
           ports:
           - containerPort: 80
